@@ -58,24 +58,4 @@ public class BasketSplitter {
 
         return result;
     }
-
-    public static void main(String[] args) throws IOException, ParseException {
-        BasketSplitter basketSplitter = new BasketSplitter("D:\\OCADO_EX\\src\\test\\resources\\config0.json");
-
-        List<String> basket = Arrays.asList(
-                "Steak (300g)",
-                "Carrots (1kg)",
-                "Cold Beer (330ml)",
-                "AA Battery (4 Pcs.)",
-                "Espresso Machine",
-                "Garden Chair"
-        );
-
-
-
-        Map<String, List<String>> result = basketSplitter.split(basket);
-        for (Object e : result.entrySet()) {
-            System.out.println(e);
-        }
-    }
 }
