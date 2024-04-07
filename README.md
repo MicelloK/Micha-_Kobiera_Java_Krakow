@@ -17,6 +17,8 @@ public Map<String, List<String>> split(List<String> items)
 Metoda ta przyjmuje listę przedmiotów w koszyku (`List<String>`)
 i zwraca mapę (`Map<String, List<String>>`), w której kluczem jest gurpa dostaw, a wartością lista przedmiotów.
 
+Nie zostało zaimplementowane sprawdzenie poprawności pliku konfiguracyjnego. Treść zadania zakłada poprawność tego pliku.
+
 ## Algorytm
 Problem podzielenia koszyka przedmiotów na grupę dostaw to znany problem SetCover.
 Szukanie optymalnego pokrycia jest NP-trudne ([Wikipedia](https://en.wikipedia.org/wiki/Set_cover_problem)).
