@@ -16,88 +16,66 @@ public class BasketSplitter {
             Reader reader = new FileReader(absolutePathToConfigFile);
             config = (JSONObject) jsonParser.parse(reader);
         } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Wrong config file");
         }
     }
 
     public Map<String, List<String>> split(List<String> items) {
         // parse input
         Map<String, List<String>> input = new LinkedHashMap<>();
+
         for (String item : items) {
             JSONArray catList = (JSONArray) config.get(item);
+            if (catList == null) {
+                throw new RuntimeException("The item is not in the config file");
+            }
             for (Object cat : catList) {
                 String category = (String) cat;
-                if (!input.containsKey(category)) {
-                    List<String> list = new LinkedList<>();
-                    list.add(item);
-
-                    input.put(category, list);
-                }
-                else {
-                    input.get(category).add(item);
-                }
+                input.computeIfAbsent(category, k -> new LinkedList<>()).add(item);
             }
         }
 
         // find solution - greedy approximation
         Map<String, List<String>> result = new LinkedHashMap<>();
         while (!input.isEmpty()) {
-            // find category with number of uncovered elements
-            String numerousCategory = "";
-            int numOfElements = 0;
-            for (String category : input.keySet()) {
-                if (input.get(category).size() > numOfElements) {
-                    numerousCategory = category;
-                    numOfElements = input.get(category).size();
-                }
-            }
-            List<String> products = input.get(numerousCategory);
+            // find category with the greatest number of uncovered elements
+            String numerousCategory = input.keySet().stream()
+                    .max(Comparator.comparingInt(category -> input.get(category).size()))
+                    .orElse(null);
+
+            List<String> products = input.remove(numerousCategory);
 
             // add category to result
             result.put(numerousCategory, products);
 
             // update input map
-            input.remove(numerousCategory);
-            for (String product : products) {
-//                for (String category : input.keySet()) {
-//                    List<String> categoryProducts = input.get(category);
-//                    categoryProducts.remove(product);
-//                    if (categoryProducts.isEmpty()) {
-//                        input.remove(category);
-//                    }
-//                }
-                Iterator<String> categoryIterator = input.keySet().iterator();
-                while (categoryIterator.hasNext()) {
-                    String category = categoryIterator.next();
-                    List<String> categoryProducts = input.get(category);
-                    categoryProducts.remove(product);
-                    if (categoryProducts.isEmpty()) {
-                        categoryIterator.remove();
-                    }
-                }
-            }
+            input.forEach((category, categoryProducts) ->
+                    categoryProducts.removeAll(products));
 
+            // remove empty categories
+            input.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         }
 
         return result;
     }
 
     public static void main(String[] args) throws IOException, ParseException {
-        BasketSplitter basketSplitter = new BasketSplitter("D:\\OCADO_EX\\src\\main\\resources\\config.json");
-        List<String> basket = new LinkedList<>();
+        BasketSplitter basketSplitter = new BasketSplitter("D:\\OCADO_EX\\src\\test\\resources\\config0.json");
 
-        basket.add("Cocoa Butter");
-        basket.add("Tart - Raisin And Pecan");
-        basket.add("Table Cloth 54x72 White");
-        basket.add("Flower - Daisies");
-        basket.add("Fond - Chocolate");
-        basket.add("Cookies - Englishbay Wht");
+        List<String> basket = Arrays.asList(
+                "Steak (300g)",
+                "Carrots (1kg)",
+                "Cold Beer (330ml)",
+                "AA Battery (4 Pcs.)",
+                "Espresso Machine",
+                "Garden Chair"
+        );
+
+
 
         Map<String, List<String>> result = basketSplitter.split(basket);
         for (Object e : result.entrySet()) {
             System.out.println(e);
         }
-
-
     }
 }
